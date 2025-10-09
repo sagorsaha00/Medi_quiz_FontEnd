@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import Toast from 'react-native-toast-message';
 // import { AppState } from 'react-native';
 import { create } from 'zustand';
+import { clearTokens } from './tokenTopic';
 interface User {
   email: string;
 }
@@ -30,14 +32,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
   hydrateUser: async () => {
     const raw = await AsyncStorage.getItem('user');
+    console.log("details file user data from async storage",raw);
     if (raw) {
       set({ user: JSON.parse(raw), lastActive: Date.now() });
+    }
+    if(!raw){
+      Toast.show({
+        type: 'error',
+        text1: 'Session Expired! Please login again.',
+        position: 'bottom',
+      });
+      router.replace('/(login)/login');
     }
   },
 
   logout: async () => {
     try {
       await AsyncStorage.removeItem('user');
+      clearTokens()
       set({ user: null });
       router.replace('/(login)/login');
     } catch (e) {

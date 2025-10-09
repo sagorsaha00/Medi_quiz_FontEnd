@@ -129,7 +129,6 @@ QuestionCard.displayName = 'QuestionCard';
 export default function ExamSection() {
   const params = useLocalSearchParams<{ subject: string }>();
   const subject = params.subject;
-  console.log('subject param:', subject);
   const [answers, setAnswers] = useState<Answers>({});
   const [quizEnded, setQuizEnded] = useState(false);
   const [globalTime, setGlobalTime] = useState(600); // 10 minutes
@@ -422,7 +421,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f7fa',
     padding: 15,
-    marginTop: 20,
+    marginTop: 3,
   },
   loadingContainer: {
     flex: 1,

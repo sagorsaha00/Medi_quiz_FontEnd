@@ -41,7 +41,9 @@ const PracticeQuiz: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const params = useLocalSearchParams<{ subject: string }>();
   const subject = params.subject;
+  console.log("subject",subject);
 
+  console.log("selection",selectedOption);
   const BackendUrl = BACKENDURL;
 
   // 👉 Random Question Query
@@ -61,7 +63,7 @@ const PracticeQuiz: React.FC = () => {
           throw new Error(`Error fetching quiz: ${response.statusText}`);
         }
         const result = await response.json();
-        console.log('API Response:', result);
+        
         return result;
       } catch (err) {
         console.log('Error fetching question');
@@ -72,6 +74,7 @@ const PracticeQuiz: React.FC = () => {
     retry: 2,
   });
 
+  
   const submitMutation = useMutation({
     mutationFn: async ({
       questionId,
@@ -80,14 +83,18 @@ const PracticeQuiz: React.FC = () => {
       questionId: string;
       selectedOption: string;
     }) => {
+
       const res = await axios.post<SubmitResponse>(
-        `BackendUrl/quiz/submitRandomQuiz`,
+        `http://192.168.1.104:3000/quiz/submitRandomQuiz`,
         { questionId, selectedOption }
       );
+      console.log("res",res.data);
       return res.data;
     },
-    // Removed auto-advance - user must click Next Question button
+    retry: 1,
   });
+
+  console.log("submitMutation",submitMutation.data);
 
   // Get current question from the questions array
   const questionData = apiData?.questions?.[currentQuestionIndex];
@@ -146,7 +153,7 @@ const PracticeQuiz: React.FC = () => {
   return (
    <>
     <SafeAreaView style={styles.container}>
-   <StatusBar></StatusBar>
+   <StatusBar barStyle="dark-content"></StatusBar>
       {/* Progress indicator */}
       <View style={styles.progressContainer}>
         <Text style={styles.progressText}>
