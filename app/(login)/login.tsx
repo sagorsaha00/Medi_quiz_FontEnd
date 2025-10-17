@@ -1,7 +1,9 @@
+import { useUserLogin } from '@/auth/signup';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import React, { useState, useCallback } from 'react';
+import { useRouter } from 'expo-router';
+import { Formik } from 'formik';
+import React, { useCallback, useState } from 'react';
 import {
   Alert,
   StatusBar,
@@ -11,10 +13,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Formik } from 'formik';
+import Toast from 'react-native-toast-message';
 import * as Yup from 'yup';
-import { useUserLogin } from '@/auth/signup';
-
+import { useAuthStore } from '../../utils/details';
 // ✅ Yup validation schema
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email('Enter a valid email').required('Email is required'),
@@ -25,22 +26,38 @@ export default function LoginScreen() {
   // ✅ Hooks always at the top
   const [showPassword, setShowPassword] = useState(false);
   const { mutate: loginMutate, isPending } = useUserLogin();
+  const setUser = useAuthStore((state) => state.setUser);
+  const user = useAuthStore((state) => state.user);
 
+  const router = useRouter();
+    if(user){
+     router.replace('/home');
+  }
   // ✅ Memoized submit handler
   const handleLogin = useCallback(
     (values: { email: string; password: string }) => {
       loginMutate(values, {
         onSuccess: (data) => {
-          Alert.alert('Login Successful', `Welcome back, ${data.email}!`);
-           
-          router.replace('/home');
+           Toast.show({
+            type: 'success',
+            text1: 'Login Successful',
+            position: 'top',
+          });
+          console.log("Login data", data);
+           setUser(data)
+           console.log("router",router);
+         setTimeout(() => {
+    router.replace('/home');
+  }, 100);
         },
         onError: (error: any) => {
           console.log('Login error:', error);
-          Alert.alert(
-            'Login Failed',
-            error?.response?.data?.message || 'An error occurred during login.'
-          );
+          Toast.show({
+            type: 'error',
+            text1: 'Login Failed',
+            text2: error?.response?.data?.message || 'An error occurred. Please try again.',
+            position: 'top',
+          });
         },
       });
     },

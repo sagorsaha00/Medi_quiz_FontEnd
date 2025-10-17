@@ -9,12 +9,11 @@ import {
   StatusBar,
   StyleSheet,
   Text,
-  TextInput,
-  TouchableOpacity,
   View,
   SafeAreaView,
 } from "react-native";
-import Animated, {
+import Animated,
+{
   Easing,
   interpolate,
   useAnimatedStyle,
@@ -91,27 +90,26 @@ export default function App() {
       ]}
     >
       <StatusBar
-        barStyle={theme === "dark" ? "light-content" : "dark-content"}
+        barStyle="light-content"
+        backgroundColor={theme === "dark" ? "#0f1724" : "#F9FAFB"}
       />
 
       {/* HEADER */}
       <Animated.View style={[styles.headerWrap, headerStyle]}>
         <LinearGradient
-          colors={
-            theme === "dark"
-              ? ["#7C3AED", "#4C1D95"]
-              : ["#A78BFA", "#C4B5FD"]
-          }
+          colors={["#7C3AED", "#4C1D95"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
           style={styles.header}
         >
           <View style={styles.headerTop}>
-            <Ionicons name="home-outline" size={22} color="#fff" />
+            <Pressable onPress={() => router.back()}>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </Pressable>
+            <Text style={styles.headerTitle}>Chemistry</Text>
             <Pressable
-              onPress={() =>
-                setTheme((prev) => (prev === "dark" ? "light" : "dark"))
-              }
+              onPress={() => setTheme(prev => prev === "dark" ? "light" : "dark")}
               style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-              accessibilityLabel="Toggle theme"
             >
               <View style={styles.themeToggle}>
                 <Ionicons
@@ -130,7 +128,7 @@ export default function App() {
               }}
               autoPlay
               loop
-              style={{ width: 160, height: 160 }}
+              style={styles.lottieAnimation}
             />
           </View>
         </LinearGradient>
@@ -148,30 +146,24 @@ export default function App() {
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 60 }}
+          contentContainerStyle={styles.scrollContent}
         >
-      
-
           {/* Sections */}
           <View style={styles.sectionList}>
             {sections.map((s) => (
-              <TouchableOpacity
-                key={s.id} // ✅ unique key
-                activeOpacity={0.85}
+              <Pressable
+                key={s.id}
                 onPress={() => {
-                  if (s.id === "exam") {
-                    router.push("/(exam_section)/exam?subject=Chemistry");
-                  } else if (s.id === "quiz") {
-                    router.push("/(exam_section)/quiz?subject=Chemistry");
-                  }
+                  router.push(
+                    `/(exam_section)/${s.id}?subject=Chemistry`
+                  );
                 }}
-                style={[
+                style={({ pressed }) => [
                   styles.sectionCard,
                   {
-                    borderLeftColor:
-                      s.id === "exam" ? "#00E5FF" : "#FF7AA2",
-                    backgroundColor:
-                      theme === "dark" ? "#1E293B" : "#F9FAFB",
+                    backgroundColor: theme === "dark" ? "#1E293B" : "#F9FAFB",
+                    opacity: pressed ? 0.9 : 1,
+                    transform: [{ scale: pressed ? 0.98 : 1 }],
                   },
                 ]}
               >
@@ -179,15 +171,14 @@ export default function App() {
                   style={[
                     styles.cardIcon,
                     {
-                      backgroundColor:
-                        s.id === "exam" ? "#0BC5EA" : "#FF6B8A",
+                      backgroundColor: s.id === "exam" ? "#0BC5EA" : "#FF6B8A",
                     },
                   ]}
                 >
-                  <Ionicons name={s.icon} size={22} color="#fff" />
+                  <Ionicons name={s.icon} size={24} color="#fff" />
                 </View>
 
-                <View style={{ flex: 1 }}>
+                <View style={styles.cardContent}>
                   <Text
                     style={[
                       styles.cardTitle,
@@ -211,7 +202,7 @@ export default function App() {
                   size={20}
                   color={theme === "dark" ? "#9CA3AF" : "#374151"}
                 />
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
         </ScrollView>
@@ -226,76 +217,91 @@ const styles = StyleSheet.create({
   },
   headerWrap: {
     zIndex: 10,
+    elevation: 3,
   },
   header: {
-    paddingTop: 50,
-    paddingHorizontal: 18,
-    paddingBottom: 10,
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 30,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
-    height: 240,
-    overflow: "hidden",
+    height: 260,
   },
   headerTop: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 20,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
   },
   themeToggle: {
-    width: 42,
-    height: 30,
-    borderRadius: 999,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
   },
   hero: {
     alignItems: "center",
-    marginTop: 10,
+    justifyContent: "center",
+    flex: 1,
+  },
+  lottieAnimation: {
+    width: 200,
+    height: 200,
   },
   sheetContainer: {
     flex: 1,
-    marginTop: -20,
+    marginTop: -30,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     paddingTop: 20,
+    elevation: 1,
   },
-  searchRow: {
-    paddingHorizontal: 18,
-    marginBottom: 10,
-  },
-  searchBox: {
-    height: 44,
-    borderRadius: 999,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-    gap: 10,
-  },
-  searchText: {
-    fontSize: 14,
-    flex: 1,
+  scrollContent: {
+    paddingBottom: 60,
   },
   sectionList: {
-    paddingHorizontal: 18,
+    paddingHorizontal: 20,
     paddingTop: 10,
   },
   sectionCard: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 14,
-    borderRadius: 14,
+    padding: 16,
+    borderRadius: 16,
     marginBottom: 12,
-    borderLeftWidth: 6,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 2,
   },
   cardIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 12,
+    width: 50,
+    height: 50,
+    borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 14,
   },
-  cardTitle: { fontSize: 16, fontWeight: "700" },
-  cardSubtitle: { fontSize: 13, marginTop: 2 },
+  cardContent: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  cardTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  cardSubtitle: {
+    fontSize: 14,
+  },
 });

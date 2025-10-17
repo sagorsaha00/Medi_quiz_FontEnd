@@ -1,32 +1,32 @@
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
-import LottieView from 'lottie-react-native';
-import { useEffect, useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import LottieView from "lottie-react-native";
+import { useEffect, useState, useMemo } from "react";
 import {
   Pressable,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
-  TextInput,
-  TouchableOpacity,
   View,
-} from 'react-native';
-import Animated, {
+  SafeAreaView,
+} from "react-native";
+import Animated,
+{
   Easing,
   interpolate,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
   withTiming,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
 
 export default function App() {
   const router = useRouter();
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState("dark");
 
-  const themeAnim = useSharedValue(theme === 'dark' ? 0 : 1);
+  const themeAnim = useSharedValue(theme === "dark" ? 0 : 1);
   const headerEntrance = useSharedValue(0);
   const cardsEntrance = useSharedValue(0);
 
@@ -42,7 +42,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    themeAnim.value = withTiming(theme === 'dark' ? 0 : 1, {
+    themeAnim.value = withTiming(theme === "dark" ? 0 : 1, {
       duration: 500,
       easing: Easing.inOut(Easing.quad),
     });
@@ -63,40 +63,57 @@ export default function App() {
     ],
   }));
 
-  const sections = [
-    {
-      id: 'exam',
-      title: 'Exam Section',
-      subtitle: 'Mock tests & schedules',
-      icon: 'clipboard',
-    },
-    {
-      id: 'quiz',
-      title: 'Quiz Practice',
-      subtitle: 'Daily practice questions',
-      icon: 'help-circle',
-    },
-  ];
+  // ✅ Memoize to prevent re-creation and key warnings
+  const sections = useMemo(
+    () => [
+      {
+        id: "exam",
+        title: "Exam Section",
+        subtitle: "Mock tests & schedules",
+        icon: "clipboard",
+      },
+      {
+        id: "quiz",
+        title: "Quiz Practice",
+        subtitle: "Daily practice questions",
+        icon: "help-circle",
+      },
+    ],
+    []
+  );
 
   return (
-<>
-    <View style={styles.root}>
+    <SafeAreaView
+      style={[
+        styles.root,
+        { backgroundColor: theme === "dark" ? "#0f1724" : "#F9FAFB" },
+      ]}
+    >
       <StatusBar
-        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+        barStyle="light-content"
+        backgroundColor={theme === "dark" ? "#0f1724" : "#F9FAFB"}
       />
 
+      {/* HEADER */}
       <Animated.View style={[styles.headerWrap, headerStyle]}>
-        <LinearGradient colors={['#7C3AED', '#4C1D95']} style={styles.header}>
+        <LinearGradient
+          colors={["#7C3AED", "#4C1D95"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
+        >
           <View style={styles.headerTop}>
-            <Ionicons name="home-outline" size={22} color="#fff" />
+            <Pressable onPress={() => router.back()}>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </Pressable>
+            <Text style={styles.headerTitle}>Chemistry</Text>
             <Pressable
-              onPress={() => setTheme((p) => (p === 'dark' ? 'light' : 'dark'))}
+              onPress={() => setTheme(prev => prev === "dark" ? "light" : "dark")}
               style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
-              accessibilityLabel="Toggle theme"
             >
               <View style={styles.themeToggle}>
                 <Ionicons
-                  name={theme === 'dark' ? 'moon' : 'sunny'}
+                  name={theme === "dark" ? "moon" : "sunny"}
                   size={18}
                   color="#fff"
                 />
@@ -105,33 +122,38 @@ export default function App() {
           </View>
 
           <View style={styles.hero}>
-            <View style={styles.lottieWrapper}>
-              <LottieView
-                source={{
-                  uri: 'https://lottie.host/3dfe3292-dde3-4a9b-a780-b2f6c5360e35/VzFeB1.json',
-                }}
-                autoPlay
-                loop
-                style={{ width: 180, height: 180 }}
-              />
-            </View>
+            <LottieView
+              source={{
+                uri: "https://lottie.host/3dfe3292-dde3-4a9b-a780-b2f6c5360e35/VzFeB1.json",
+              }}
+              autoPlay
+              loop
+              style={styles.lottieAnimation}
+            />
           </View>
         </LinearGradient>
       </Animated.View>
 
-      <Animated.View style={[styles.sheetContainer, cardsStyle]}>
+      {/* MAIN CONTENT */}
+      <Animated.View
+        style={[
+          styles.sheetContainer,
+          {
+            backgroundColor: theme === "dark" ? "#111827" : "#fff",
+          },
+          cardsStyle,
+        ]}
+      >
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
+          contentContainerStyle={styles.scrollContent}
         >
-          
-
+          {/* Sections */}
           <View style={styles.sectionList}>
-            {sections.map((s, i) => (
-              <TouchableOpacity
+            {sections.map((s) => (
+              <Pressable
                 key={s.id}
-                activeOpacity={0.85}
-                onPress={() => {
+                 onPress={() => {
                   if (s.id === 'exam') {
                     router.push('/(exam_section)/exam?subject=GK');
                   } else if (s.id === 'quiz') {
@@ -140,34 +162,31 @@ export default function App() {
                     router.push('/(exam_section)/video?subject=GK');
                   }
                 }}
-                style={[
+                style={({ pressed }) => [
                   styles.sectionCard,
                   {
-                    borderLeftColor:
-                      i === 0 ? '#00E5FF' : i === 1 ? '#FF7AA2' : '#4EE6B8',
+                    backgroundColor: theme === "dark" ? "#1E293B" : "#F9FAFB",
+                    opacity: pressed ? 0.9 : 1,
+                    transform: [{ scale: pressed ? 0.98 : 1 }],
                   },
-                  theme === 'dark' ? styles.cardDark : styles.cardLight,
                 ]}
               >
                 <View
                   style={[
                     styles.cardIcon,
                     {
-                      backgroundColor:
-                        i === 0 ? '#0BC5EA' : i === 1 ? '#FF6B8A' : '#32D5A8',
+                      backgroundColor: s.id === "exam" ? "#0BC5EA" : "#FF6B8A",
                     },
                   ]}
                 >
-                  <Ionicons name={s.icon} size={22} color="#fff" />
+                  <Ionicons name={s.icon} size={24} color="#fff" />
                 </View>
 
-                <View style={{ flex: 1 }}>
+                <View style={styles.cardContent}>
                   <Text
                     style={[
                       styles.cardTitle,
-                      theme === 'dark'
-                        ? { color: '#EDEDED' }
-                        : { color: '#111827' },
+                      { color: theme === "dark" ? "#EDEDED" : "#111827" },
                     ]}
                   >
                     {s.title}
@@ -175,9 +194,7 @@ export default function App() {
                   <Text
                     style={[
                       styles.cardSubtitle,
-                      theme === 'dark'
-                        ? { color: '#9CA3AF' }
-                        : { color: '#6B7280' },
+                      { color: theme === "dark" ? "#9CA3AF" : "#6B7280" },
                     ]}
                   >
                     {s.subtitle}
@@ -187,91 +204,108 @@ export default function App() {
                 <Ionicons
                   name="chevron-forward"
                   size={20}
-                  color={theme === 'dark' ? '#9CA3AF' : '#374151'}
+                  color={theme === "dark" ? "#9CA3AF" : "#374151"}
                 />
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
         </ScrollView>
       </Animated.View>
-    </View>
-</>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#0f1724' },
-  headerWrap: { zIndex: 10 },
+  root: {
+    flex: 1,
+  },
+  headerWrap: {
+    zIndex: 10,
+    elevation: 3,
+  },
   header: {
-    paddingTop: 44,
-    paddingBottom: 10,
-    paddingHorizontal: 18,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    height: 300,
-    overflow: 'hidden',
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    height: 260,
   },
   headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
   },
   themeToggle: {
-    width: 42,
-    height: 30,
-    borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  hero: { alignItems: 'center', marginTop: 8 },
-  lottieWrapper: {
+  hero: {
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+  },
+  lottieAnimation: {
     width: 200,
     height: 200,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   sheetContainer: {
     flex: 1,
-    marginTop: -40,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    overflow: 'hidden',
+    marginTop: -30,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingTop: 20,
+    elevation: 1,
   },
-  searchRow: { marginTop: 26, paddingHorizontal: 18, paddingTop: 18 },
-  searchBox: {
-    height: 44,
-    borderRadius: 999,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    gap: 10,
+  scrollContent: {
+    paddingBottom: 60,
   },
-  searchText: { fontSize: 14 },
-  searchLight: { backgroundColor: '#F3F4F6' },
-  searchDark: { backgroundColor: '#0B1220' },
-  sectionList: { paddingHorizontal: 18, paddingTop: 18 },
+  sectionList: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
   sectionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-    borderRadius: 14,
-    marginBottom: 14,
-    borderLeftWidth: 6,
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 2,
   },
   cardIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 14,
+    width: 50,
+    height: 50,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  cardTitle: { fontSize: 16, fontWeight: '700' },
-  cardSubtitle: { fontSize: 13, marginTop: 2 },
-  cardLight: { backgroundColor: '#fff' },
-  cardDark: {
-    backgroundColor: '#0B1220',
-    borderColor: 'rgba(255,255,255,0.03)',
+  cardContent: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  cardTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  cardSubtitle: {
+    fontSize: 14,
   },
 });

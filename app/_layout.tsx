@@ -5,6 +5,7 @@ import { Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from "react-native";
 import { useAutoRefresh } from '../auth/autoRefreshToken';
+import Toast from 'react-native-toast-message';
 export default function RootLayout() {
 
  
@@ -27,8 +28,6 @@ export default function RootLayout() {
   );
   
 
- 
- 
   const { hydrateUser, updateActivity, checkInactivity } = useAuthStore();
 
 
@@ -64,7 +63,7 @@ export default function RootLayout() {
           />
         </Stack>
       </ThemeProvider>
-      
+      <Toast/> 
     </QueryClientProvider>
   );
 }

@@ -1,57 +1,51 @@
-import { BACKENDURL } from "@/config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Toast from "react-native-toast-message";
-import { logout } from "../utils/details";
+import { BACKENDURL } from "../config/config";
+import { useAuthStore } from "../utils/details";
 import { clearTokens, getRefreshToken, saveTokens } from "../utils/tokenTopic";
-
 export const useAutoRefresh = () => {
-  const [userExists, setUserExists] = useState(null);
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
-    const checkUser = async () => {
-      console.log("⏳ Checking user for token refresh");
-      const storedUser = await AsyncStorage.getItem("user");
-      setUserExists(!!storedUser);
-    };
-    checkUser();
-  }, []);
-
-  useEffect(() => {
-    if (!userExists) return;
-
     const interval = setInterval(async () => {
       try {
-        const currentUser = await AsyncStorage.getItem("user");
-        console.log("⏳ Checking user for token refresh:", currentUser);
-        if (!currentUser) {
-          console.log("⚠️ User no longer exists, stopping auto-refresh");
-          setUserExists(false);
-          return;
-        }
+        if (!user) return;
 
-        const refreshToken = getRefreshToken();
-        console.log("refreshToken", refreshToken);
+        // ✅ Await to get the actual token string
+        const refreshToken = await getRefreshToken();
+        console.log("🟡 Retrieved refresh token:", refreshToken);
 
         if (!refreshToken) {
-          console.log("⚠️ Refresh token not found.");
-          throw new Error("Refresh token missing");
+          throw new Error("No refresh token found in storage");
         }
 
-        const res = await axios.post(`${BACKENDURL}/auth/refresh`, {
-          refreshToken,
-        });
-        console.log("🔄 Token refresh response:", refreshToken);
+        let res;
+        try {
+          res = await axios.post(`${BACKENDURL}/auth/refresh`, {
+            refreshToken: refreshToken,
+          });
+        } catch (err) {
+          console.log("❌ Token refresh failed:", err.response?.status);
+          console.log("Response:", err.response?.data);
+          throw new Error("Token refresh failed");
+        }
+
+        if (!res?.data) {
+          throw new Error("No response data from server");
+        }
+
         const { accessToken, refreshToken: newRefreshToken } = res.data.tokens;
-        console.log("accessToken", accessToken, "newRefreshToken", newRefreshToken);
+        console.log("✅ Tokens refreshed:", newRefreshToken);
 
         if (!accessToken || !newRefreshToken) {
           throw new Error("Tokens missing in response");
         }
-
+        await clearTokens();
         await saveTokens(accessToken, newRefreshToken);
-        console.log("✅ Access token refreshed successfully");
+        console.log("✅ Tokens saved successfully");
       } catch (err) {
         console.error("❌ Auto token refresh failed:", err?.message);
 
@@ -63,11 +57,10 @@ export const useAutoRefresh = () => {
 
         await AsyncStorage.removeItem("user");
         await clearTokens();
-        logout();
-        setUserExists(false);
+        logout(); // ✅ Zustand থেকে নেওয়া logout
       }
-    }, 12 * 1000);
+    }, 1 * 60 * 1000); // প্রতি ৫ মিনিটে টোকেন রিফ্রেশ
 
     return () => clearInterval(interval);
-  }, [userExists]);
+  }, [user]);
 };

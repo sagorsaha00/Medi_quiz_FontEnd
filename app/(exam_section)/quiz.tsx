@@ -5,11 +5,11 @@ import React, { useState } from 'react';
 import {
   ActivityIndicator,
   SafeAreaView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  StatusBar,
 } from 'react-native';
 import { BACKENDURL } from '../../config/config';
 
@@ -63,7 +63,7 @@ const PracticeQuiz: React.FC = () => {
           throw new Error(`Error fetching quiz: ${response.statusText}`);
         }
         const result = await response.json();
-        
+        console.log("result",result);
         return result;
       } catch (err) {
         console.log('Error fetching question');
@@ -85,7 +85,7 @@ const PracticeQuiz: React.FC = () => {
     }) => {
 
       const res = await axios.post<SubmitResponse>(
-        `http://192.168.1.104:3000/quiz/submitRandomQuiz`,
+        `${BackendUrl}/quiz/submitRandomQuiz`,
         { questionId, selectedOption }
       );
       console.log("res",res.data);
@@ -94,7 +94,7 @@ const PracticeQuiz: React.FC = () => {
     retry: 1,
   });
 
-  console.log("submitMutation",submitMutation.data);
+ 
 
   // Get current question from the questions array
   const questionData = apiData?.questions?.[currentQuestionIndex];

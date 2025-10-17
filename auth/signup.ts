@@ -1,4 +1,5 @@
 import { BACKENDURL } from "@/config/config";
+import { FormValues } from "@/utils/Schma";
 import { saveTokens } from "@/utils/tokenTopic";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation } from "@tanstack/react-query";
@@ -7,7 +8,7 @@ import axios from "axios";
 export const UserRegister = () =>
   useMutation({
     mutationKey: ["register"],
-    mutationFn: async (userData) => {
+    mutationFn: async (userData:FormValues) => {
       const response = await axios.post(
         `${BACKENDURL}/auth/createUser`,
         userData,
@@ -54,6 +55,7 @@ export const useUserLogin = () =>
       if (!accessToken || !refreshToken) {
         throw new Error("❌ Tokens missing in response");
       }
+    
 
       await AsyncStorage.setItem("accessToken", accessToken);
       await AsyncStorage.setItem("refreshToken", refreshToken);

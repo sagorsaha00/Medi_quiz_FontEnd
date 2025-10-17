@@ -1,4 +1,5 @@
-import { FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { useAuthStore } from '@/utils/details';
+import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
@@ -67,8 +68,15 @@ export default function QuizHomeScreen() {
     opacity: useSharedValue(0),
     scale: useSharedValue(0.8),
   }));
-
+ 
+  const user = useAuthStore((state) => state.user);
+  console.log("cheak user home", user);
+ 
+  
   useEffect(() => {
+       if(!user){
+      router.replace('/(login)/login');
+     }
     headerOpacity.value = withTiming(1, { duration: 500 });
     headerTranslateY.value = withSpring(0);
 
@@ -214,13 +222,14 @@ export default function QuizHomeScreen() {
             elevation: 4,
           }}
         >
+           <MaterialCommunityIcons name="plus-box-outline" size={42} color="#00BFFF" />
           <Text style={{ color: '#fff', fontSize: 14, fontWeight: 'bold' }}>
             Add Quiz
           </Text>
         </TouchableOpacity>
 
         {/* GroupChat */}
-        <TouchableOpacity 
+        {/* <TouchableOpacity 
         onPress={() => router.push(`/GroupChat`)}
           style={{
             backgroundColor: '#1c1c1e',
@@ -236,11 +245,18 @@ export default function QuizHomeScreen() {
             shadowRadius: 5,
             elevation: 4,
           }}
+          
         >
+          <Ionicons
+    name="chatbubbles-outline"   // icon name
+    size={42}                    // icon size
+    color="#00BFFF"              // icon color
+    style={{ marginBottom: 10 }} // নিচে একটু gap
+  />
           <Text style={{ color: '#fff', fontSize: 14, fontWeight: 'bold' }}>
             GroupChat
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* PDF Section */}
         <TouchableOpacity
@@ -259,9 +275,12 @@ export default function QuizHomeScreen() {
             shadowRadius: 5,
             elevation: 4,
           }}
+          onPress={() => router.push(`/(extra)/AllQuestionsScreen`)}
+
         >
+          <Ionicons name="book-outline" size={42} color="#32CD32" />
           <Text style={{ color: '#fff', fontSize: 14, fontWeight: 'bold' }}>
-            Pdf Section
+            All Question
           </Text>
         </TouchableOpacity>
       </ScrollView>
