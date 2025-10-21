@@ -460,7 +460,7 @@ export default function ResultPage(): React.ReactElement {
   };
 
   const handleHome = () => {
-    router.push('/');
+    router.push('/home');
   };
 
   return (
@@ -516,6 +516,7 @@ export default function ResultPage(): React.ReactElement {
             </TouchableOpacity>
 
             <TouchableOpacity
+              
               style={[styles.button, styles.homeButton]}
               onPress={handleHome}
             >

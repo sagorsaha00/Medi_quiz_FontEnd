@@ -1,5 +1,4 @@
-// QuizHistoryScreen.tsx (modified for your API response)
-// Uses your actual backend history format
+ 
 
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
@@ -15,7 +14,6 @@ import {
   View,
 } from 'react-native';
 
-// ---------- Types ---------- //
 export type QuizHistoryItem = {
   _id: string;
   userId: string;
@@ -55,11 +53,12 @@ const ProgressBar = ({ value }: { value: number }) => (
   </View>
 );
 
-const BackendUrl = process.env.BACKENDURL;
+ 
 
-// ---------- Fetch ---------- //
+ 
 async function fetchHistory(): Promise<QuizHistoryItem[]> {
-  const res = await fetch('BackendUrl/quiz/GetResultHistory');
+  const res = await fetch(`http://192.168.1.104:3000/quiz/GetResultHistory`);
+  console.log("res",res);
   if (!res.ok) throw new Error('Failed to fetch history');
   const json = await res.json();
   return json.history || [];

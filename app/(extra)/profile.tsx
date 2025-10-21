@@ -1,5 +1,9 @@
-import React, { useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Image,
   StatusBar,
@@ -8,24 +12,55 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { GetUserInfo } from '../../auth/signup';
 import { useAuthStore } from '../../utils/details';
 
 export default function ProfileScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const { logout } = useAuthStore();
 
-  const user = {
-    username: 'Sagor Saha',
-    email: 'artimas@example.com',
-    password: 'mypassword123',
-    profilePic: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
-  };
+  // ✅ Get user data hook
+  const { mutate: getUserInfo, data, isPending, error } =  GetUserInfo();
 
-  const handleEditProfile = () => {};
-  const handleQuizResult = () => {};
-  const handleSettings = () => {};
+  useEffect(() => {
+    getUserInfo(); // call API once component loads
+  }, []);
+
+  // ✅ Safe fallback user data
+  const user = data?.user  
+  console.log("user",user);
+ 
+
+  console.log("data all",data.user);
+
+  // ✅ Loading State
+  if (isPending) {
+    return (
+      <LinearGradient colors={['#4F46E5', '#7C3AED', '#9333EA']} style={styles.centered}>
+        <ActivityIndicator size="large" color="#fff" />
+        <Text style={{ color: '#fff', marginTop: 10 }}>Loading user info...</Text>
+      </LinearGradient>
+    );
+  }
+
+  // ✅ Error State
+  if (error) {
+    return (
+      <LinearGradient colors={['#4F46E5', '#7C3AED', '#9333EA']} style={styles.centered}>
+        <Text style={{ color: '#fff', fontSize: 16, textAlign: 'center', paddingHorizontal: 20 }}>
+          ⚠️ {error.message || 'Failed to load user info'}
+        </Text>
+        <TouchableOpacity
+          onPress={() => getUserInfo()}
+          style={{ backgroundColor: '#fff', padding: 10, borderRadius: 8, marginTop: 15 }}
+        >
+          <Text style={{ color: '#4F46E5', fontWeight: 'bold' }}>Retry</Text>
+        </TouchableOpacity>
+      </LinearGradient>
+    );
+  }
+
+  // ✅ Logout Confirmation
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
@@ -34,74 +69,53 @@ export default function ProfileScreen() {
         style: 'destructive',
         onPress: () => {
           logout();
+          router.replace('/login');
         },
       },
     ]);
   };
 
   return (
-    <LinearGradient
-      colors={['#4F46E5', '#7C3AED', '#9333EA']}
-      style={styles.container}
-    >
+    <LinearGradient colors={['#4F46E5', '#7C3AED', '#9333EA']} style={styles.container}>
       <StatusBar barStyle="light-content" />
-      {/* Header Section */}
+      {/* Header */}
       <View style={styles.header}>
-        <Image source={{ uri: user.profilePic }} style={styles.profilePic} />
-        <Text style={styles.name}>{user.username}</Text>
-        <Text style={styles.email}>{user.email}</Text>
+        <Image source={{ uri: user.avatar }} style={styles.profilePic} />
+        <Text style={styles.name}>
+          {user?.firstName } {user?.lastName || ''}
+        </Text>
+        <Text style={styles.email}>{user?.email }</Text>
       </View>
 
-      {/* Card */}
+      {/* Info Card */}
       <View style={styles.card}>
         <View style={styles.row}>
           <Ionicons name="person-outline" size={22} color="#6366F1" />
           <Text style={styles.label}>Username</Text>
-          <Text style={styles.value}>{user.username}</Text>
+          <Text style={styles.value}>{user?.username }</Text>
         </View>
 
         <View style={styles.row}>
           <Ionicons name="mail-outline" size={22} color="#6366F1" />
           <Text style={styles.label}>Email</Text>
-          <Text style={styles.value}>{user.email}</Text>
+          <Text style={styles.value}>{user?.email }</Text>
         </View>
 
         <View style={styles.row}>
           <Ionicons name="lock-closed-outline" size={22} color="#6366F1" />
           <Text style={styles.label}>Password</Text>
-          <Text style={styles.value}>
-            {showPassword ? user.password : '••••••••'}
-          </Text>
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-            <Ionicons
-              name={showPassword ? 'eye-off' : 'eye'}
-              size={20}
-              color="#6B7280"
-              style={{ marginLeft: 8 }}
-            />
-          </TouchableOpacity>
+          <Text style={styles.value}>{showPassword ? 'password123' : '••••••••'}</Text>
+           
         </View>
       </View>
 
       {/* Menu Buttons */}
       <View style={styles.menuContainer}>
         <MenuButton
-          title="Edit Profile"
-          icon="create-outline"
-          color="#6366F1"
-          onPress={handleEditProfile}
-        />
-        <MenuButton
           title="My Quiz Results"
           icon="stats-chart-outline"
           color="#10B981"
-          onPress={handleQuizResult}
-        />
-        <MenuButton
-          title="Settings"
-          icon="settings-outline"
-          color="#F59E0B"
-          onPress={handleSettings}
+          onPress={() => router.push('/(extra)/QuizHistoryScreen')}
         />
         <MenuButton
           title="Logout"
@@ -114,15 +128,8 @@ export default function ProfileScreen() {
   );
 }
 
-/* -------------------- Reusable Menu Button -------------------- */
-interface MenuButtonProps {
-  title: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  color: string;
-  onPress: () => void;
-}
-
-function MenuButton({ title, icon, color, onPress }: MenuButtonProps) {
+// ✅ Menu Button Component
+function MenuButton({ title, icon, color, onPress }: any) {
   return (
     <TouchableOpacity style={styles.menuButton} onPress={onPress} activeOpacity={0.85}>
       <View style={[styles.iconContainer, { backgroundColor: color }]}>
@@ -134,12 +141,17 @@ function MenuButton({ title, icon, color, onPress }: MenuButtonProps) {
   );
 }
 
-/* -------------------- Styles -------------------- */
+// ✅ Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 60,
     paddingHorizontal: 20,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     alignItems: 'center',
@@ -218,3 +230,5 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
 });
+
+ 

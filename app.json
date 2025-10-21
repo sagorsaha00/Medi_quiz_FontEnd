@@ -19,7 +19,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.mrartimas.medi_Quiz_app"
     },
     "web": {
       "output": "static",
@@ -42,6 +43,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7a32c4d9-0fbe-43d5-81e5-784cc28c2319"
+      }
     }
   }
 }
