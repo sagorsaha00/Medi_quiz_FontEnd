@@ -29,7 +29,7 @@
     "expo-image-picker": "~17.0.8",
     "expo-linear-gradient": "~15.0.7",
     "expo-linking": "~8.0.8",
-    "expo-router": "~6.0.10",
+    "expo-router": "^6.0.13",
     "expo-splash-screen": "~31.0.10",
     "expo-status-bar": "~3.0.8",
     "expo-symbols": "~1.0.7",
@@ -55,10 +55,11 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/react": "~19.1.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
-    "prettier": "3.6.2",
+    "prettier": "^3.6.2",
     "typescript": "~5.9.2"
   },
   "private": true

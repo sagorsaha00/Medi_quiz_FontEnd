@@ -1,20 +1,9 @@
 import { useAuthStore } from '@/utils/details'
-import {
-    FontAwesome5,
-    Ionicons,
-    MaterialCommunityIcons,
-} from '@expo/vector-icons'
+import { FontAwesome5, FontAwesome6, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import React, { useEffect } from 'react'
-import {
-    Image,
-    ScrollView,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native'
+import { ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native'
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -22,6 +11,7 @@ import Animated, {
     withSpring,
     withTiming,
 } from 'react-native-reanimated'
+import { GetUserInfo } from '../(extra)/profile'
 
 export default function QuizHomeScreen() {
     const categories = [
@@ -75,25 +65,22 @@ export default function QuizHomeScreen() {
 
     const user = useAuthStore((state) => state.user)
     console.log('cheak user home', user)
-
+    const { mutate, data } = GetUserInfo()
     useEffect(() => {
         if (!user) {
             router.replace('/(login)/login')
         }
+        mutate()
         headerOpacity.value = withTiming(1, { duration: 500 })
         headerTranslateY.value = withSpring(0)
 
         cardAnimations.forEach((anim, index) => {
-            anim.opacity.value = withDelay(
-                index * 150,
-                withTiming(1, { duration: 500 })
-            )
-            anim.scale.value = withDelay(
-                index * 150,
-                withSpring(1, { damping: 8 })
-            )
+            anim.opacity.value = withDelay(index * 150, withTiming(1, { duration: 500 }))
+            anim.scale.value = withDelay(index * 150, withSpring(1, { damping: 8 }))
         })
     }, [])
+
+    const username = data?.user.firstName || 'User'
 
     return (
         <>
@@ -119,26 +106,16 @@ export default function QuizHomeScreen() {
                                     fontWeight: 'bold',
                                 }}
                             >
-                                Hi, Sagor 👋
+                                Hi, {username} 👋
                             </Text>
                             <Text style={{ color: '#aaa', fontSize: 14 }}>
                                 Let’s make this day productive
                             </Text>
                         </View>
 
-                        <TouchableOpacity
-                            onPress={() => router.push('/(extra)/profile')}
-                        >
-                            <Image
-                                source={{
-                                    uri: 'https://cdn-icons-png.flaticon.com/512/4333/4333609.png',
-                                }}
-                                style={{
-                                    width: 50,
-                                    height: 50,
-                                    borderRadius: 25,
-                                }}
-                            />
+                        <TouchableOpacity onPress={() => router.push('/(extra)/profile')}>
+                            <FontAwesome6 name="user-doctor" size={34} color="white" />
+                            <Text style={{ color: '#fff',fontSize: 12,textAlign:'center', }} >Profile</Text>
                         </TouchableOpacity>
                     </LinearGradient>
                 </Animated.View>
@@ -170,9 +147,7 @@ export default function QuizHomeScreen() {
                         // Animation styles for each card
                         const animatedStyle = useAnimatedStyle(() => ({
                             opacity: cardAnimations[index].opacity.value,
-                            transform: [
-                                { scale: cardAnimations[index].scale.value },
-                            ],
+                            transform: [{ scale: cardAnimations[index].scale.value }],
                         }))
 
                         return (
@@ -195,9 +170,7 @@ export default function QuizHomeScreen() {
                                 ]}
                             >
                                 <TouchableOpacity
-                                    onPress={() =>
-                                        router.push(`/(subject)/${cat.name}`)
-                                    }
+                                    onPress={() => router.push(`/(subject)/${cat.name}`)}
                                     style={{ alignItems: 'center' }}
                                 >
                                     <View
@@ -208,11 +181,7 @@ export default function QuizHomeScreen() {
                                             backgroundColor: cat.color + '33',
                                         }}
                                     >
-                                        <IconComp
-                                            name={cat.icon}
-                                            size={40}
-                                            color={cat.color}
-                                        />
+                                        <IconComp name={cat.icon} size={40} color={cat.color} />
                                     </View>
 
                                     <Text
@@ -224,9 +193,7 @@ export default function QuizHomeScreen() {
                                     >
                                         {cat.name}
                                     </Text>
-                                    <Text
-                                        style={{ color: '#aaa', fontSize: 12 }}
-                                    >
+                                    <Text style={{ color: '#aaa', fontSize: 12 }}>
                                         {cat.questions} questions
                                     </Text>
                                 </TouchableOpacity>
@@ -255,11 +222,7 @@ export default function QuizHomeScreen() {
                         elevation: 4,
                     }}
                 >
-                    <MaterialCommunityIcons
-                        name="plus-box-outline"
-                        size={42}
-                        color="#00BFFF"
-                    />
+                    <MaterialCommunityIcons name="plus-box-outline" size={42} color="#00BFFF" />
                     <Text
                         style={{
                             color: '#fff',

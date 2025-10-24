@@ -38,7 +38,7 @@ export const GetUserInfo = () => {
             })
 
             const data = response.data
-            console.log('✅ User data fetched:', data.user.firstName)
+             
             return data
         },
     })
@@ -47,19 +47,14 @@ export const GetUserInfo = () => {
 export default function ProfileScreen() {
     const { logout } = useAuthStore()
 
-    // ✅ useMutation hook থেকে mutate function নিন
+    
     const { mutate, data, isPending, isError, error } = GetUserInfo()
-
-    // ✅ Component mount হলে data fetch করুন
+ 
     useEffect(() => {
-        mutate() // ✅ এভাবে call করতে হবে
+        mutate()  
     }, [])
 
-    // ✅ Console log করে দেখুন কি আসছে
-    console.log('Profile Data:', JSON.stringify(data, null, 2))
-    console.log('Is Loading:', isPending)
-    console.log('Is Error:', isError)
-    console.log('Error:', error)
+     
 
     // ✅ Loading State
     if (isPending) {
@@ -137,8 +132,8 @@ export default function ProfileScreen() {
         )
     }
 
-    const user = data.user
-    console.log('user', user)
+   const user = data.user
+  
 
     // ✅ Logout Confirmation
     const handleLogout = () => {
